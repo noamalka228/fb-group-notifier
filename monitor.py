@@ -50,15 +50,25 @@ def send_telegram(bot_token: str, chat_id: str, message: str):
         log(f"  [ERROR] Telegram send failed: {e}")
         return False
 
-def is_recent_timestamp(time_str: str, max_minutes: int = 12) -> bool:
+def is_recent_timestamp(time_str: str, max_minutes: int = 60) -> bool:
     """Parse Facebook time string and return True if it's <= max_minutes."""
     t = time_str.lower().strip()
     if "just now" in t:
         return True
+    
+    # Check for minutes
     if "minute" in t or re.match(r'^\d+\s*m$', t):
         nums = re.findall(r'\d+', t)
         if nums and int(nums[0]) <= max_minutes:
             return True
+            
+    # Check for hours
+    if "hour" in t or "hr" in t or re.match(r'^\d+\s*h$', t):
+        nums = re.findall(r'\d+', t)
+        hours = int(nums[0]) if nums else 1 # e.g., "about an hour ago" -> 1
+        if hours * 60 <= max_minutes:
+            return True
+            
     return False
 
 async def fetch_and_parse_group(group_url: str) -> list[dict]:
@@ -135,8 +145,8 @@ async def fetch_and_parse_group(group_url: str) -> list[dict]:
                 author = lines[0]
                 timestamp_line = lines[1]
                 
-                # Filter: Only keep posts made in the last ~30 minutes
-                if not is_recent_timestamp(timestamp_line, max_minutes=30):
+                # Filter: Only keep posts made in the last ~1 hour (60 minutes)
+                if not is_recent_timestamp(timestamp_line, max_minutes=60):
                     continue
 
                 links = await article.query_selector_all('a')
@@ -203,7 +213,7 @@ async def trigger_check():
         return {"error": "Missing environment variables (FACEBOOK_GROUP_URL, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID)"}
 
     posts = await fetch_and_parse_group(group_url)
-    log(f"  Found {len(posts)} recent posts (<= 30 mins old)")
+    log(f"  Found {len(posts)} recent posts (<= 60 mins old)")
 
     sent_messages = []
     for post in reversed(posts): 
