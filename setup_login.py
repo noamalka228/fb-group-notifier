@@ -5,13 +5,13 @@ Saves the session so the monitor can run headlessly.
 """
 import asyncio
 import os
-import json
 from playwright.async_api import async_playwright
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATE_FILE = os.path.join(SCRIPT_DIR, "browser_state.json")
-CONFIG_FILE = os.path.join(SCRIPT_DIR, "config.json")
-
 
 async def main():
     print("="*60)
@@ -19,23 +19,10 @@ async def main():
     print("="*60)
     print()
 
-    # Validate config
-    if not os.path.exists(CONFIG_FILE):
-        print("[ERROR] config.json not found. Please create it first.")
-        return
-
-    with open(CONFIG_FILE) as f:
-        config = json.load(f)
-
-    if config.get("telegram_bot_token", "").startswith("PASTE"):
-        print("[WARNING] You haven't set your Telegram bot token in config.json yet.")
-        print("          You can still proceed with Facebook login setup.")
-        print()
-
     print("A browser window will open. Please:")
-    print("  1. Log in to your Facebook account")
-    print("  2. Navigate to your target group to verify access")
-    print("  3. Come back here and press Enter")
+    print("  1. Log in to your burner Facebook account")
+    print("  2. Wait for the feed to load completely")
+    print("  3. Come back to this terminal and press Enter")
     print()
 
     async with async_playwright() as p:
@@ -45,7 +32,9 @@ async def main():
             locale="en-US",
         )
         page = await context.new_page()
-        await page.goto("https://www.facebook.com/")
+        
+        group_url = os.getenv("FACEBOOK_GROUP_URL", "https://www.facebook.com/")
+        await page.goto(group_url)
 
         input(">>> Press Enter here AFTER you have logged in to Facebook... ")
 
@@ -55,8 +44,7 @@ async def main():
 
     print()
     print(f"[OK] Session saved to {STATE_FILE}")
-    print("     You can now run monitor.py")
-
+    print("     You can now copy the contents of this file into your Render FB_COOKIES variable.")
 
 if __name__ == "__main__":
     asyncio.run(main())
