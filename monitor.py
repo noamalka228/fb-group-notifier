@@ -69,8 +69,8 @@ def trigger_scrape():
     run_input = {
         "startUrls": [{"url": group_url}],
         "viewOption": "CHRONOLOGICAL",
-        "onlyPostsNewerThan": "30 minutes", # Maximize efficiency: Filter natively on Apify
-        "maxPosts": 5, # Hard limit: Never return more than 5 posts per run to prevent cost spikes
+        "onlyPostsNewerThan": "15 minutes", # Strict filtering on Apify's side
+        "maxPosts": 10, # Hard limit
     }
 
     log("  Starting Apify Actor (apify/facebook-groups-scraper)...")
