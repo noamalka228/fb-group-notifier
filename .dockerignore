@@ -1,6 +1,0 @@
-__pycache__/
-*.pyc
-monitor.log
-debug_screenshot.png
-browser_state.json
-.git/
