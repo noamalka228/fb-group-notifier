@@ -50,7 +50,7 @@ def send_telegram(bot_token: str, chat_id: str, message: str):
         log(f"  [ERROR] Telegram send failed: {e}")
         return False
 
-def is_recent_timestamp(time_str: str, max_minutes: int = 60) -> bool:
+def is_recent_timestamp(time_str: str, max_minutes: int = 10) -> bool:
     """Parse Facebook time string and return True if it's <= max_minutes."""
     t = time_str.lower().strip()
     if "just now" in t:
@@ -96,9 +96,22 @@ async def fetch_and_parse_group(group_url: str) -> list[dict]:
     ]
     profile = random.choice(ua_profiles)
 
+    # Load Facebook cookies from environment variable
+    fb_cookies_str = os.getenv("FB_COOKIES")
+    storage_state_param = None
+    if fb_cookies_str:
+        try:
+            storage_state_param = json.loads(fb_cookies_str)
+            log("  [INFO] Successfully loaded FB_COOKIES from environment.")
+        except Exception as e:
+            log(f"  [WARN] Failed to parse FB_COOKIES JSON: {e}")
+    else:
+        log("  [WARN] No FB_COOKIES environment variable found. Running unauthenticated (likely to be blocked).")
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         context = await browser.new_context(
+            storage_state=storage_state_param,
             viewport={"width": 1280, "height": 900},
             locale="en-US",
             user_agent=profile["ua"],
