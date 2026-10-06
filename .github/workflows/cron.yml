@@ -1,7 +1,7 @@
 name: Trigger Facebook Scraper
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/15 5-20 * * *'
   workflow_dispatch: # Allows you to manually click "Run workflow" for testing
 
 jobs:
