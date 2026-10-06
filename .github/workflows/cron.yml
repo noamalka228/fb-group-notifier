@@ -1,0 +1,14 @@
+name: Trigger Facebook Scraper
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows you to manually click "Run workflow" for testing
+
+jobs:
+  ping_render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API Endpoint
+        run: |
+          curl -sS -X GET "${{ secrets.RENDER_API_URL }}/trigger" \
+          -H "X-Trigger-Secret: ${{ secrets.TRIGGER_SECRET }}"
