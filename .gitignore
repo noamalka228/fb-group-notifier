@@ -5,3 +5,5 @@ monitor.log
 debug_screenshot.png
 browser_state.json
 seen_posts.json
+state/
+.venv/
