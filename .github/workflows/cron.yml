@@ -10,5 +10,5 @@ jobs:
     steps:
       - name: Ping API Endpoint
         run: |
-          curl -sS -X GET "${{ secrets.RENDER_API_URL }}/trigger" \
+          curl -sS -X GET "${{ secrets.API_URL }}/trigger" \
           -H "X-Trigger-Secret: ${{ secrets.TRIGGER_SECRET }}"
