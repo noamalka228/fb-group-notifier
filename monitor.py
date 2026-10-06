@@ -89,11 +89,31 @@ def trigger_scrape():
     sent_messages = []
     
     for item in reversed(dataset_items):
-        author = item.get("user", {}).get("name", "Unknown Author")
-        text = item.get("text", "")
-        post_url = item.get("url", "")
-        timestamp = item.get("date", "")
-        post_id = item.get("postId", "unknown")
+        # Media / Image Filtering
+        media = item.get("media") or item.get("images") or item.get("attachments") or item.get("photos") or []
+        if not media:
+            log("  >> Skipping post: No images found.")
+            continue
+
+        # Robust Author Extraction
+        author = "Unknown Author"
+        if isinstance(item.get("user"), dict) and item["user"].get("name"):
+            author = item["user"]["name"]
+        elif isinstance(item.get("author"), dict) and item["author"].get("name"):
+            author = item["author"]["name"]
+        else:
+            author = item.get("authorName") or item.get("userName") or item.get("user_name") or "Unknown Author"
+
+        # Robust Text Extraction
+        text = item.get("text") or item.get("message") or item.get("postText") or item.get("content") or item.get("caption") or ""
+        
+        # Robust URL & Date Extraction
+        post_url = item.get("url") or item.get("postUrl") or item.get("link") or ""
+        timestamp = item.get("date") or item.get("time") or item.get("createdAt") or item.get("timestamp") or ""
+        post_id = item.get("postId") or item.get("id") or "unknown"
+        
+        if author == "Unknown Author" and not text:
+            log(f"  [DEBUG] Schema mismatch detected. Available keys: {list(item.keys())}")
 
         lines = [f"📢 <b>New post in group</b>"]
         lines.append(f"👤 <b>{_escape_html(author)}</b>")
