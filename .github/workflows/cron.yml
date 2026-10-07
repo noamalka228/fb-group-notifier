@@ -8,6 +8,8 @@ jobs:
   ping_render:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Ping API Endpoint
         run: |
           curl -sS -X GET "${{ secrets.API_URL }}/trigger" \
